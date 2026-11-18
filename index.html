@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Genxsis.Faith</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  html,body{width:100%;min-height:100%;margin:0;background:#020202;color:#fa0000}
+  /* The original entry screen contains only the red button on black. */
+  .entry-screen{position:fixed;inset:0;z-index:20;background:#020202;display:flex;
+    align-items:center;justify-content:center;transition:opacity .25s ease}
+  .entry-screen.is-hidden{opacity:0;pointer-events:none}
+  .entry-screen button{border:1px solid #fa0000;background:#fa0000;color:#020202;
+    font:inherit;font-size:clamp(16px,1.6vw,32px);padding:10px 22px;cursor:pointer;
+    transition:250ms ease-in-out}
+  .entry-screen button:hover{background:#020202;color:#fa0000}
+  .site{display:none;min-height:100vh}
+  .site.is-visible{display:flex}
+  .site header{min-height:100px}
+  .site header .site-header-left,.site header .site-header-right{width:80px;display:flex;align-items:center}
+  .site header .site-header-left img,.site header .site-header-right img{max-width:80px}
+  .key-trigger{border:0;background:transparent;padding:0;cursor:pointer;display:block;line-height:0}
+  .key-trigger img{display:block;max-width:80px;transition:transform .2s ease}
+  .key-trigger:hover img{transform:scale(1.07)}
+  .cipher-lightbox{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.96);display:none;align-items:center;justify-content:center;padding:24px;box-sizing:border-box}
+  .cipher-lightbox.is-open{display:flex}
+  .cipher-lightbox img{display:block;max-width:min(94vw,1100px);max-height:92vh;width:auto;height:auto;object-fit:contain}
+  .cipher-close{position:absolute;top:18px;right:24px;border:1px solid #c00;background:#050505;color:#f00;font-size:30px;line-height:1;padding:5px 12px;cursor:pointer}
+  .site header .site-header-middle{position:absolute;left:50%;transform:translateX(-50%);text-align:center}
+  .site header .site-header-middle h1{color:#fa0000}
+  .site main{min-height:0;display:flex;flex:1;position:relative}
+  .site main .main-inner{position:relative;inset:auto;width:100%;min-height:55vh;display:flex;align-items:center;justify-content:center}
+  .video-frame{width:min(100%,1200px);aspect-ratio:4/3;margin:auto;background:#000}
+  .video-frame video{display:block;width:100%;height:100%;object-fit:contain;background:#000}
+  .site footer .site-footer-top{align-items:center}
+  .site footer .site-footer-top a{font-size:clamp(14px,1.2vw,20px)}
+  .overlay{position:fixed;inset:0;z-index:30;background:#020202;opacity:0;pointer-events:none;
+    overflow-y:auto;transition:opacity .2s ease;display:flex;flex-direction:column}
+  .overlay .overlay-header{display:flex;justify-content:flex-end}
+  .overlay .overlay-main{flex:1}
+  .overlay-evaluation .overlay-main .content{max-width:1200px}
+  .overlay-evaluation h2{color:#fa0000}
+  .question{display:none}
+  .question:first-child{display:block}
+  .question .radio-buttons label{color:#eee}
+  #submit-button{display:none;margin-top:24px}
+  .result-content{text-align:center;max-width:900px;margin:8vh auto;padding:24px;color:#eee}
+  .result-content h2{color:#fa0000}
+  .overlay-close{background:none;border:0;cursor:pointer}
+  .overlay-close span{pointer-events:none}
+  @media(max-width:720px){
+    .site header{min-height:82px}
+    .site header .site-header-left,.site header .site-header-right{width:48px}
+    .site header .site-header-left img,.site header .site-header-right img,.key-trigger img{max-width:48px}
+    .cipher-lightbox{padding:12px}.cipher-lightbox img{max-width:96vw;max-height:88vh}
+    .site main .main-inner{min-height:42vh}
+    .video-frame{width:100%}
+  }
+
+.result-card{max-width:860px;margin:5vh auto 8vh;padding:clamp(22px,4vw,48px);text-align:center;color:#eee}
+.result-card .result-emblem{width:clamp(150px,24vw,260px);height:auto;display:block;margin:0 auto 24px;filter:drop-shadow(0 0 18px rgba(250,0,0,.18))}
+.result-card h2{font-size:clamp(15px,1.5vw,20px);letter-spacing:.22em;color:#fa0000;text-transform:uppercase;margin:0 0 12px}
+.result-card h3{font-size:clamp(28px,4vw,48px);font-weight:500;margin:0 0 24px;color:#fff}
+.result-card p{font-size:clamp(15px,1.35vw,19px);line-height:1.8;color:#d7d7d7;text-align:left}
+.result-card .result-note{margin-top:28px;color:#888;font-size:12px;text-align:center}
+.result-card .result-again{margin-top:22px;border:1px solid #fa0000;background:transparent;color:#fa0000;padding:12px 26px;cursor:pointer;letter-spacing:.08em}
+.result-card .result-again:hover{background:#fa0000;color:#080808}
+
+</style>
+</head>
+<body>
+<section class="entry-screen" id="entry">
+  <button id="enter-button" type="button">Join Next Gen</button>
+</section>
+
+<div class="site" id="site">
+  <header>
+    <div class="site-header-left"><img src="symbol-left.png" alt=""></div>
+    <div class="site-header-middle"><h1>Genxsis.Faith</h1></div>
+    <div class="site-header-right"><button class="key-trigger" id="key-trigger" type="button" aria-label="Open the cipher"><img src="key.png" alt="Open cipher"></button></div>
+  </header>
+
+  <main>
+    <div class="main-inner">
+      <div class="video-frame">
+        <video controls playsinline preload="metadata" poster="poster.jpg">
+          <source src="genxsis-original.mp4" type="video/mp4">
+          Your browser does not support the video element.
+        </video>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="site-footer-top">
+      <a href="#" class="evaluation-link" id="evaluation-link">Evaluation</a>
+      <a href="#" class="redemption-link" id="redemption-link">Redemption</a>
+    </div>
+    <div class="site-footer-bottom">© 2023 Sony Music Entertainment UK Ltd. | Privacy &amp; Cookie Policy</div>
+  </footer>
+</div>
+
+<section class="overlay overlay-evaluation" id="evaluation" aria-hidden="true">
+  <div class="overlay-header"><button class="overlay-close" type="button" aria-label="Close"><span></span><span></span></button></div>
+  <div class="overlay-main">
+    <div class="content">
+      <h2>General aptitude and moral suitability evaluation</h2>
+      <p>Please answer the following questions to complete your evaluation.</p>
+      <form id="quiz">
+        <div class="question"><h3><span>001</span><br>A woman is crossing the road and you see a car speeding towards her. Neither of them are paying attention. Do you:</h3><div class="radio-buttons">
+          <label><input type="radio" name="q1" value="a"><span>Ignore the situation. If it is her fate, then it is her fate.</span></label>
+          <label><input type="radio" name="q1" value="b"><span>Shout out to the woman and warn her of the speeding car.</span></label>
+          <label><input type="radio" name="q1" value="c"><span>Run into the road and take the hit yourself.</span></label>
+          <label><input type="radio" name="q1" value="d"><span>Watch what happens.</span></label>
+        </div></div>
+        <div class="question"><h3><span>002</span><br>You climb a mountain you have been staring at longingly all of your life. Upon reaching the pinnacle, you feel:</h3><div class="radio-buttons">
+          <label><input type="radio" name="q2" value="a"><span>As if your whole life has led to this one moment, yet somehow you feel empty.</span></label>
+          <label><input type="radio" name="q2" value="b"><span>Exhilarated, as if the world is at your fingertips.</span></label>
+          <label><input type="radio" name="q2" value="c"><span>As if your whole body and soul has changed, closer to heaven and paradise above.</span></label>
+          <label><input type="radio" name="q2" value="d"><span>The pain of the climb has dampened your spirit.</span></label>
+        </div></div>
+        <div class="question"><h3><span>003</span><br>A young boy steals a loaf of bread. You discover he is homeless and desperate. Do you:</h3><div class="radio-buttons">
+          <label><input type="radio" name="q3" value="a"><span>Take the bread back. He needs to learn a lesson.</span></label>
+          <label><input type="radio" name="q3" value="b"><span>Give him money and offer comfort.</span></label>
+          <label><input type="radio" name="q3" value="c"><span>Take him home, feed him and offer to adopt him.</span></label>
+          <label><input type="radio" name="q3" value="d"><span>Ignore him and carry on.</span></label>
+        </div></div>
+        <div class="question"><h3><span>004</span><br>You are given the opportunity to learn the truth behind the world's mysteries. What do you do?</h3><div class="radio-buttons">
+          <label><input type="radio" name="q4" value="a"><span>Walk into the forest and meditate, seeking answers within yourself.</span></label>
+          <label><input type="radio" name="q4" value="b"><span>Discuss your hopes and dreams with a friend.</span></label>
+          <label><input type="radio" name="q4" value="c"><span>Look to the moon and stars, exploring symbolism, spiritualism and religion.</span></label>
+          <label><input type="radio" name="q4" value="d"><span>Search the dark web and investigate conspiracies.</span></label>
+        </div></div>
+        <div class="question"><h3><span>005</span><br>You see a glowing orb in the darkness. What do you do?</h3><div class="radio-buttons">
+          <label><input type="radio" name="q5" value="a"><span>Follow it towards a pure new life.</span></label>
+          <label><input type="radio" name="q5" value="b"><span>Pause and examine it logically.</span></label>
+          <label><input type="radio" name="q5" value="c"><span>Welcome it into your palm and find a pathway together.</span></label>
+          <label><input type="radio" name="q5" value="d"><span>Walk past it and lead your own path.</span></label>
+        </div></div>
+        <input disabled type="submit" id="submit-button" value="Submit">
+      </form>
+    </div>
+  </div>
+</section>
+
+<section class="overlay" id="result-overlay" aria-hidden="true">
+  <div class="overlay-header"><button class="overlay-close" type="button" aria-label="Close"><span></span><span></span></button></div>
+  <div class="overlay-main"><div class="result-content" id="result-content"></div></div>
+</section>
+
+<div class="cipher-lightbox" id="cipher-lightbox" role="dialog" aria-modal="true" aria-label="Genxsis cipher"><button class="cipher-close" id="cipher-close" type="button" aria-label="Close cipher">×</button><img src="cypher(1).png" alt="Original Genxsis cipher"></div>
+
+<section class="overlay" id="redemption" aria-hidden="true">
+  <div class="overlay-header"><button class="overlay-close" type="button" aria-label="Close"><span></span><span></span></button></div>
+  <div class="overlay-main"><div class="result-content"><h2>Redemption</h2><p>The original redemption service required a private server and cannot be reproduced offline.</p></div></div>
+</section>
+
+<script>
+const entry=document.getElementById('entry');
+const site=document.getElementById('site');
+document.getElementById('enter-button').addEventListener('click',()=>{
+  entry.classList.add('is-hidden');
+  setTimeout(()=>{entry.style.display='none';site.classList.add('is-visible');},260);
+});
+function showOverlay(el){el.style.opacity='1';el.style.pointerEvents='auto';el.setAttribute('aria-hidden','false');document.body.classList.add('locked');}
+function hideOverlay(el){el.style.opacity='0';el.style.pointerEvents='none';el.setAttribute('aria-hidden','true');document.body.classList.remove('locked');}
+const evaluation=document.getElementById('evaluation');
+document.getElementById('evaluation-link').addEventListener('click',e=>{
+  e.preventDefault();
+  document.querySelectorAll('.question').forEach((q,i)=>q.style.display=i===0?'block':'none');
+  document.getElementById('submit-button').style.display='none';
+  showOverlay(evaluation);
+});
+document.getElementById('redemption-link').addEventListener('click',e=>{e.preventDefault();showOverlay(document.getElementById('redemption'));});
+const cipherBox=document.getElementById('cipher-lightbox');
+document.getElementById('key-trigger').addEventListener('click',()=>{cipherBox.classList.add('is-open');});
+document.getElementById('cipher-close').addEventListener('click',()=>{cipherBox.classList.remove('is-open');});
+cipherBox.addEventListener('click',e=>{if(e.target===cipherBox)cipherBox.classList.remove('is-open');});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cipherBox.classList.remove('is-open');});
+document.querySelectorAll('.overlay-close').forEach(btn=>btn.addEventListener('click',()=>{
+  hideOverlay(btn.closest('.overlay'));
+}));
+document.querySelectorAll('.question input').forEach(input=>input.addEventListener('change',()=>{
+  const questions=[...document.querySelectorAll('.question')];
+  const index=questions.indexOf(input.closest('.question'));
+  if(index<questions.length-1) questions[index+1].style.display='block';
+  const allDone=questions.every(q=>q.querySelector('input:checked'));
+  const submit=document.getElementById('submit-button');
+  submit.disabled=!allDone;
+  if(allDone) submit.style.display='inline-block';
+}));
+
+const resultProfiles={
+ a:{name:'Blessed Exalter',image:'blessed_exalter.png',description:"Praise highly, so highly upon thee. Words akin to thy-self and ego flow around and off thee like wind and air, words like me and my and I, hold like the weight of a feather in thou hand and fall to the ground. Thou fears not of death, or life or betwixt either of these. But only lives to better thy-self and wish to aid all other beings. Ye reach out with a golden helping hand and grasp all that would reach back."},
+ b:{name:'Chaos Seeker',image:'chaos_seeker.png',description:"The fire consumeth thy soul, it burns and engulfs thine body, limbs and spirit. Ye draw a new pathway upon the map of life, with harsh crudeness and blunt force. Thy line of flame cuts through the social normalities and customs, it tears the map where ye judgement cares not. Thy psyche tips dangerously close to the edge of chaos, tread carefully."},
+ c:{name:'Destiny Walker',image:'destiny_walker.png',description:"Ye hopeful and bravest soul, who alloweth thy feet to walk one step timely along thy destined pathway. O great journey, O destined roadmap, carved out like fateful paving stones before thou. Ye Destiny Walker cares not for sight, for thee passageway was meant for thy feet even if thou was rendered blind, even if thou was lost in the great unknown thou would light the true direction with thine very first step. Worry not on the twists and turns of your quest, as whichever doorway thou chooses it will be fated true."},
+ d:{name:'Logic Dweller',image:'logic_dweller.png',description:"Logic is thine guiding light and it burns brightly within thine chest while the school of thought acts as thy beacon of judgement. Ye take precious time, to think and meditate in calm and focused serenity on the choices of life’s pathways. Each option is weighed on the scales of truth and righteousness. Not without wrongs and mistakes as ye dwell on deep contemplation, however thy focus has never been of saint, but of the wise, humbled direction and focus."}
+};
+document.getElementById('quiz').addEventListener('submit',e=>{
+  e.preventDefault();
+  const counts={a:0,b:0,c:0,d:0};
+  document.querySelectorAll('.question input:checked').forEach(i=>counts[i.value]++);
+  const max=Math.max(...Object.values(counts));
+  const winners=Object.keys(counts).filter(k=>counts[k]===max);
+  const key=winners.sort((x,y)=>'abcd'.indexOf(x)-'abcd'.indexOf(y))[0];
+  const profile=resultProfiles[key];
+  const result=document.getElementById('result-content');
+  result.innerHTML=`<div class="result-card">
+    <h2>Evaluation Result</h2>
+    <img class="result-emblem" src="${profile.image}" alt="${profile.name} emblem">
+    <h3>${profile.name}</h3>
+    <p>${profile.description}</p>
+    ${winners.length>1?'<p class="result-note">Your answers were evenly divided. This result represents the first profile among the tied outcomes.</p>':''}
+    <p class="result-note">Your evaluation has been completed.</p>
+    <button class="result-again" type="button" id="result-again">TAKE THE EVALUATION AGAIN</button>
+  </div>`;
+  hideOverlay(evaluation);showOverlay(document.getElementById('result-overlay'));
+  document.getElementById('result-again').addEventListener('click',()=>{
+    document.getElementById('quiz').reset();
+    document.querySelectorAll('.question').forEach((q,i)=>q.style.display=i===0?'block':'none');
+    const submit=document.getElementById('submit-button');
+    submit.disabled=true;submit.style.display='none';
+    hideOverlay(document.getElementById('result-overlay'));
+    showOverlay(evaluation);
+  });
+});
+
+</script>
+</body>
+</html>

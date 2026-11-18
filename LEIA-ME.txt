@@ -1,0 +1,17 @@
+GENXSIS.FAITH — reconstrução local
+
+COMO ABRIR
+1. Extraia o ZIP para uma pasta.
+2. Abra index.html no Chrome, Edge ou Firefox.
+3. A tela inicial é preta e contém somente o botão vermelho “Join the Next Gen”.
+4. Clique no botão para entrar na página com o vídeo e os símbolos.
+5. Use “Evaluation” no rodapé para abrir o questionário.
+
+O vídeo e as imagens recuperados do arquivo original foram preservados.
+A avaliação usa as cinco perguntas recuperadas do HTML. A página original de
+resultados era carregada por results.html, que não estava no material; por isso,
+a apresentação do resultado é identificada como aproximação local.
+A área Redemption dependia de um servidor externo e não funciona offline.
+
+
+ATUALIZAÇÃO: os quatro resultados do teste agora exibem emblemas vetoriais em alta nitidez, nome e descrição do material de referência. Os arquivos key.png e pmginev1973.png originais fornecidos foram preservados sem alteração.
